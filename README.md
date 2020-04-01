@@ -1,1 +1,1 @@
-serverForSavingPosts 
+server-for-saving-posts
