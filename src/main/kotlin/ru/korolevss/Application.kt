@@ -5,10 +5,9 @@ import io.ktor.response.*
 import io.ktor.request.*
 import io.ktor.routing.*
 import io.ktor.http.*
-import io.ktor.html.*
-import kotlinx.html.*
 import io.ktor.gson.*
 import io.ktor.features.*
+import io.ktor.server.cio.EngineMain
 import io.ktor.util.KtorExperimentalAPI
 import org.kodein.di.generic.bind
 import org.kodein.di.generic.instance
@@ -22,6 +21,7 @@ fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
+@KtorExperimentalAPI
 fun Application.module() {
     install(ContentNegotiation) {
         gson {

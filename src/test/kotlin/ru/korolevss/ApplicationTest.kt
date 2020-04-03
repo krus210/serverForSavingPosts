@@ -1,21 +1,21 @@
 package ru.korolevss
 
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.html.*
-import kotlinx.html.*
-import io.ktor.gson.*
-import io.ktor.features.*
-import kotlin.test.*
-import io.ktor.server.testing.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.withCharset
+import io.ktor.server.testing.contentType
+import io.ktor.server.testing.handleRequest
+import io.ktor.server.testing.withTestApplication
+import io.ktor.util.KtorExperimentalAPI
 import org.junit.Assert
+import org.junit.Test
 
 class ApplicationTest {
+
+    @KtorExperimentalAPI
     @Test
-    fun testRoot() {
+    fun `test get all`() {
         withTestApplication({ module() }) {
             with(handleRequest(HttpMethod.Get, "/api/v1/posts")) {
                 Assert.assertEquals(HttpStatusCode.OK, response.status())
