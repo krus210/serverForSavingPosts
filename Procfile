@@ -1,1 +1,1 @@
-web: ./build/install/korolevss/bin/korolevss
+web: ./build/install/serverForSavingPosts/bin/serverForSavingPosts

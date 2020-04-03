@@ -18,12 +18,11 @@ import org.kodein.di.ktor.kodein
 import ru.korolevss.dto.PostRequestDto
 import ru.korolevss.dto.PostResponseDto
 
-fun main(args: Array<String>): Unit = io.ktor.server.cio.EngineMain.main(args)
+fun main(args: Array<String>) {
+    EngineMain.main(args)
+}
 
-@KtorExperimentalAPI
-@Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.module() {
     install(ContentNegotiation) {
         gson {
             setPrettyPrinting()
