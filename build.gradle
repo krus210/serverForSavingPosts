@@ -9,7 +9,7 @@ version '0.0.1'
 sourceCompatibility = 1.8
 
 application {
-    mainClassName = "ru.korolevss.ApplicationKt"
+    mainClassName = 'ru.korolevss.ApplicationKt'
 }
 
 repositories {
