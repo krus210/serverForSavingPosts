@@ -1,1 +1,1 @@
-https://dashboard.heroku.com/apps/server-for-saving-posts
+https://server-for-saving-posts.herokuapp.com/
