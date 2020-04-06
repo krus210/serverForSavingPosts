@@ -96,7 +96,7 @@ fun Application.module() {
             }
             post {
                 val request = call.receive<PostRequestDto>()
-                val model = PostModel(id = request.id, textOfPost = request.textOfPost,
+                val model = PostModel(textOfPost = request.textOfPost,
                     nameAuthor = request.nameAuthor, photoAuthor = request.photoAuthor,
                     postType = request.postType, source = request.source, address = request.address,
                 coordinates = request.coordinates, sourceVideo = request.sourceVideo, sourceAd = request.sourceAd)

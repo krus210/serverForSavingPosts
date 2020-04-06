@@ -1,39 +1,41 @@
 package ru.korolevss
 
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
-class PostRepositoryMutex: PostRepository {
+class PostRepositoryMutex : PostRepository {
 
-    private var nextId = 1L
+    private var nextId = atomic(0L)
     private val items = mutableListOf<PostModel>()
     private val mutex = Mutex()
 
-    override suspend fun getAll(): List<PostModel> =
-        mutex.withLock {
-            items.reversed()
-        }
+    override suspend fun getAll(): List<PostModel> = items.reversed()
 
 
-    override suspend fun getById(id: Long): PostModel? =
-        mutex.withLock {
-            items.find { it.id == id }
-        }
+    override suspend fun getById(id: Long): PostModel? = items.find { it.id == id }
+
 
     override suspend fun save(item: PostModel): PostModel =
-        mutex.withLock {
-            when (val index = items.indexOfFirst { it.id == item.id }) {
-                -1 -> {
-                    val date =LocalDateTime.now().toString()
-                    val copy = item.copy(id = nextId++, dateOfPost = date)
+        when (val index = items.indexOfFirst { it.id == item.id }) {
+            -1 -> {
+                val todayDate = LocalDateTime.now()
+                val dateId = ZoneId.of("Europe/Moscow")
+                val zonedDateTime = ZonedDateTime.of(todayDate, dateId)
+                val copy = item.copy(id = nextId.incrementAndGet(), dateOfPost = zonedDateTime)
+                mutex.withLock {
                     items.add(copy)
-                    copy
                 }
-                else -> {
+                copy
+            }
+            else -> {
+                mutex.withLock {
                     items[index] = item
-                    item
                 }
+                item
             }
         }
 
@@ -43,65 +45,65 @@ class PostRepositoryMutex: PostRepository {
         }
     }
 
-    override suspend fun likeById(id: Long): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
+    override suspend fun likeById(id: Long): PostModel? {
+        val index = items.indexOfFirst { it.id == id }
+        if (index < 0) {
+            return null
+        }
+//        val post = items[index]
+//        val newPost = post.copy(likesCount = post.likesCount + 1, isLikedByUser = true)
+//        items[index] = newPost
+        with(items[index]) {
+            likesCount++
+            isLikedByUser = true
+            return this
+        }
+    }
 
-            val post = items[index]
-            val newPost = post.copy(likesCount= post.likesCount + 1, isLikedByUser = true)
-            items[index] = newPost
+    override suspend fun dislikeById(id: Long): PostModel? {
+        val index = items.indexOfFirst { it.id == id }
+        if (index < 0) {
+            return null
+        }
+//        val post = items[index]
+//        val newPost = post.copy(likesCount = post.likesCount - 1, isLikedByUser = false)
+//        items[index] = newPost
+        with(items[index]) {
+            likesCount--
+            isLikedByUser = false
+            return this
+        }
+    }
 
-            newPost
+    override suspend fun commentById(id: Long): PostModel? {
+        val index = items.indexOfFirst { it.id == id }
+        if (index < 0) {
+            return null
         }
 
-    override suspend fun dislikeById(id: Long): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
+//        val post = items[index]
+//        val newPost = post.copy(commentsCount = post.commentsCount + 1, isCommentedByUser = true)
+//        items[index] = newPost
+        with(items[index]) {
+            commentsCount--
+            isCommentedByUser = false
+            return this
+        }
+    }
 
-            val post = items[index]
-
-            val newPost = post.copy(likesCount= post.likesCount - 1, isLikedByUser = false)
-
-            items[index] = newPost
-
-            newPost
+    override suspend fun shareById(id: Long): PostModel? {
+        val index = items.indexOfFirst { it.id == id }
+        if (index < 0) {
+            return null
         }
 
-    override suspend fun commentById(id: Long): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
-
-            val post = items[index]
-
-            val newPost = post.copy(commentsCount= post.commentsCount + 1, isCommentedByUser = true)
-
-            items[index] = newPost
-
-            newPost
+//            val post = items[index]
+//            val newPost = post.copy(sharesCount = post.sharesCount + 1, isSharedByUser = true)
+//            items[index] = newPost
+        with(items[index]) {
+            sharesCount--
+            isSharedByUser = false
+            return this
         }
-
-    override suspend fun shareById(id: Long): PostModel? =
-        mutex.withLock {
-            val index = items.indexOfFirst { it.id == id }
-            if (index < 0) {
-                return@withLock null
-            }
-
-            val post = items[index]
-
-            val newPost = post.copy(sharesCount= post.sharesCount + 1, isSharedByUser = true)
-
-            items[index] = newPost
-
-            newPost
-        }
+    }
 }
